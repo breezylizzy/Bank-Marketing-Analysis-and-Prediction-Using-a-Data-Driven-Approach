@@ -1,21 +1,13 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import sklearn
 
-# =============================
-# 🧠 Load model
-# =============================
 model = joblib.load("stacking_model.pkl")
 
-# =============================
-# 🎨 UI Streamlit
-# =============================
 st.title("💰 Prediksi Deposit Nasabah (Bank Marketing)")
 st.markdown("Masukkan data nasabah di bawah ini:")
 
-# =============================
-# 🧾 Input user
-# =============================
 age = st.number_input("Umur", 18, 100, 35)
 job = st.selectbox("Pekerjaan", [
     'admin.', 'blue-collar', 'entrepreneur', 'housemaid', 'management',
@@ -35,9 +27,6 @@ pdays = st.number_input("Hari sejak kontak sebelumnya", -1, 999, 999)
 previous = st.number_input("Jumlah kontak sebelumnya", 0, 50, 0)
 poutcome = st.selectbox("Hasil kontak sebelumnya", ['success', 'failure', 'other', 'unknown'])
 
-# =============================
-# 📋 Data awal user
-# =============================
 input_data = pd.DataFrame([{
     'age': age,
     'job': job,
@@ -59,9 +48,6 @@ input_data = pd.DataFrame([{
 st.write("📋 Data Input:")
 st.dataframe(input_data)
 
-# =============================
-# ⚙️ Feature Engineering otomatis
-# =============================
 def add_features(df):
     df = df.copy()
     df["contacts_per_prev"] =  df['campaign'] / (df['previous'] + 1).replace(0, 1)
@@ -74,12 +60,8 @@ def add_features(df):
                              labels=['Young Adult', 'Early Working Adult', 'Middle-aged Adult', 'Mature Adult', 'Senior / Elderly'])
     return df
 
-# Tambahkan fitur turunan sebelum masuk ke model
 input_data_fe = add_features(input_data)
 
-# =============================
-# 🚀 Prediksi
-# =============================
 if st.button("🚀 Prediksi"):
     try:
         prob = model.predict_proba(input_data_fe)[0, 1]
